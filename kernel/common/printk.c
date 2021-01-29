@@ -60,6 +60,7 @@ static int prints(char **out, const char *string, int width, int flags)
 	int pc = 0, padchar = ' ';
 
 	if (width > 0) {
+	//control the width of output
 		int len = 0;
 		const char *ptr;
 		for (ptr = string; *ptr; ++ptr)
@@ -112,6 +113,7 @@ static int printk_write_num(char **out, long long i, int base, int sign,
 	}
 
 	if (sign && base == 10 && i < 0) {
+	//neg = negtive number
 		neg = 1;
 		u = -i;
 	}
@@ -120,7 +122,25 @@ static int printk_write_num(char **out, long long i, int base, int sign,
 	// 1. the last postion of this buffer must be '\0'
 	// 2. the format is only decided by `base` and `letbase` here
 
+	s = print_buf + PRINT_BUF_LEN;
+	*s = '\0';
+	while (u > 0) {
+		t = u % base;
+		u = u / base;
+		s--;
+		if (t < 10)
+			*s = t + '0';
+		else {
+			if (letbase)
+				*s = t - 10 + 'a';
+			else 
+				*s = t - 10 + 'A';
+		}
+
+	}
+
 	if (neg) {
+	//output "-" to the screen
 		if (width && (flags & PAD_ZERO)) {
 			simple_outputchar(out, '-');
 			++pc;
@@ -129,6 +149,7 @@ static int printk_write_num(char **out, long long i, int base, int sign,
 			*--s = '-';
 		}
 	}
+
 
 	return pc + prints(out, s, width, flags);
 }
